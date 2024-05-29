@@ -15,6 +15,7 @@ func main() {
 
 	mux.HandleFunc("GET /sellers", middleware.Auth(handlers.GetSellers))
 	mux.HandleFunc("POST /sellers", middleware.Auth(handlers.InsertSeller))
+	mux.HandleFunc("DELETE /sellers", middleware.Auth(handlers.DeleteSeller))
 
 	log.Println("Server started on port: 8080")
 	if err := http.ListenAndServe(":8080", mux); err != nil {

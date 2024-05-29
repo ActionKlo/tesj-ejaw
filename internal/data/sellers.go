@@ -66,3 +66,26 @@ func (s Seller) Insert() (int, error) {
 
 	return newSellerID, nil
 }
+
+func (s Seller) Delete() (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
+	defer cancel()
+
+	query := `delete from sellers where id = $1`
+
+	res, err := db.ExecContext(ctx, query, s.ID)
+	if err != nil {
+		return false, err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return false, err
+	}
+
+	if rowsAffected == 0 {
+		return false, nil
+	}
+
+	return true, nil
+}
