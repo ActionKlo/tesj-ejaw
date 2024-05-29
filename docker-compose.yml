@@ -18,3 +18,25 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - shop-network
+
+  migrate:
+    container_name: migrate
+    image: 'migrate/migrate'
+    command: [
+      "-path", "/internal/migrations",
+      "-database", "postgres://admin:password@db:5432/ejaw?sslmode=disable",
+      "up"
+    ]
+    volumes:
+      - ./internal/migrations:/internal/migrations
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - shop-network
+
+networks:
+  shop-network:
+    driver: bridge
