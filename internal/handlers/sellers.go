@@ -9,7 +9,7 @@ import (
 func GetSellers(w http.ResponseWriter, r *http.Request) {
 	sellers, err := data.Seller{}.GetAll()
 	if err != nil {
-		utils.SendError(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 

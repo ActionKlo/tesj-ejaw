@@ -14,19 +14,3 @@ func SendJSON(w http.ResponseWriter, data any) {
 		return
 	}
 }
-
-type ErrorResponse struct {
-	Error string `json:"error"`
-}
-
-func SendError(w http.ResponseWriter, errorMessage string, statusCode int) {
-	w.Header().Set("Content-Type", "application/json")
-
-	w.WriteHeader(statusCode)
-
-	err := json.NewEncoder(w).Encode(ErrorResponse{Error: errorMessage})
-	if err != nil {
-		http.Error(w, errorMessage, statusCode)
-		return
-	}
-}
