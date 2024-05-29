@@ -14,6 +14,7 @@ func main() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /sellers", middleware.Auth(handlers.GetSellers))
+	mux.HandleFunc("POST /sellers", middleware.Auth(handlers.InsertSellers))
 
 	log.Println("Server started on port: 8080")
 	if err := http.ListenAndServe(":8080", mux); err != nil {
