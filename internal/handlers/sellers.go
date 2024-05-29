@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/ActionKlo/test-ejaw/internal/data"
 	"github.com/ActionKlo/test-ejaw/internal/utils"
 	"io"
@@ -31,6 +32,11 @@ func InsertSeller(w http.ResponseWriter, r *http.Request) {
 			log.Println("failed to close r.Body:", err.Error())
 		}
 	}(r.Body)
+
+	if seller.Name == "" || seller.Phone == "" {
+		http.Error(w, errors.New("bad request body").Error(), http.StatusBadRequest)
+		return
+	}
 
 	id, err := seller.Insert()
 	if err != nil {

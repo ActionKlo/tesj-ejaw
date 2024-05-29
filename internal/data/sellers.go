@@ -11,8 +11,8 @@ const dbTimeout = time.Second * 3
 
 type Seller struct {
 	ID    int    `json:"id"`
-	Name  string `json:"name"`
-	Phone string `json:"phone"`
+	Name  string `json:"name,omitempty"`
+	Phone string `json:"phone,omitempty"`
 }
 
 func (s Seller) GetAll() ([]Seller, error) {
