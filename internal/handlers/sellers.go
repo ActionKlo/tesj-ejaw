@@ -19,7 +19,7 @@ func GetSellers(w http.ResponseWriter, r *http.Request) {
 	utils.SendJSON(w, sellers)
 }
 
-func InsertSellers(w http.ResponseWriter, r *http.Request) {
+func InsertSeller(w http.ResponseWriter, r *http.Request) {
 	var seller data.Seller
 	if err := json.NewDecoder(r.Body).Decode(&seller); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
