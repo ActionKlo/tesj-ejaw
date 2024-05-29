@@ -1,0 +1,49 @@
+GET http://localhost:8080/sellers
+Accept: application/json
+
+> {%
+    client.test("Request without authentication", function() {
+        client.assert(response.status === 401, "Response status is not 401");
+    });
+%}
+
+###
+
+GET http://localhost:8080/sellers
+Authorization: Basic admin admin
+Accept: application/json
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+###
+
+POST http://localhost:8080/sellers
+Content-Type: application/json
+
+{
+  "name": "Andrei",
+  "phone": "100200300"
+}
+
+> {%
+    client.test("Request without authentication", function() {
+        client.assert(response.status === 401, "Response status is not 401");
+    });
+%}
+
+###
+
+POST http://localhost:8080/sellers
+Authorization: Basic admin admin
+Content-Type: application/json
+
+{
+  "name": "Andrei",
+  "phone": "100200300"
+}
+
+###
