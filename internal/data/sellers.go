@@ -2,6 +2,8 @@ package data
 
 import (
 	"context"
+	"database/sql"
+	"log"
 	"time"
 )
 
@@ -19,20 +21,22 @@ func (s Seller) GetAll() ([]Seller, error) {
 
 	query := `select id, name, phone from sellers`
 
-	//db := InitDB()
-
 	rows, err := db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
 	}
-	// TODO catch err from rows.Close()
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		err = rows.Close()
+		if err != nil {
+			log.Println("failed to close sql.Rows:", err.Error())
+		}
+	}(rows)
 
 	var sellers []Seller
 
 	for rows.Next() {
 		var seller Seller
-		if err := rows.Scan(
+		if err = rows.Scan(
 			&seller.ID,
 			&seller.Name,
 			&seller.Phone,
@@ -44,4 +48,21 @@ func (s Seller) GetAll() ([]Seller, error) {
 	}
 
 	return sellers, nil
+}
+
+func (s Seller) Insert() (int, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
+	defer cancel()
+
+	query := `insert into sellers (name, phone) values ($1, $2) returning id`
+
+	var newSellerID int
+	if err := db.QueryRowContext(ctx, query,
+		s.Name,
+		s.Phone,
+	).Scan(&newSellerID); err != nil {
+		return 0, err
+	}
+
+	return newSellerID, nil
 }
