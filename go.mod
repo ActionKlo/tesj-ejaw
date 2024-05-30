@@ -3,7 +3,7 @@ module github.com/ActionKlo/test-ejaw
 go 1.22.1
 
 require (
-	github.com/jackc/pgx/v4 v4.18.3
+	github.com/jackc/pgx/v4 v4.18.2
 	go.uber.org/zap v1.13.0
 )
 
