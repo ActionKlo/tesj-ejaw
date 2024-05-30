@@ -7,6 +7,8 @@ COPY . /app
 
 WORKDIR /app
 
+RUN go mod tidy
+
 RUN CGO_ENABLE=0 go build -o shopAPI ./cmd/api/
 
 RUN chmod +x /app/shopAPI
