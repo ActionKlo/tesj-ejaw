@@ -3,7 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
-	"github.com/ActionKlo/test-ejaw/internal/data"
+	"github.com/ActionKlo/test-ejaw/internal/repository"
 	"go.uber.org/zap"
 	"io"
 	"net/http"
@@ -27,7 +27,7 @@ func sendJSON(w http.ResponseWriter, statusCode int, data any) {
 func GetSellers(w http.ResponseWriter, r *http.Request) {
 	logger := r.Context().Value("logger").(*zap.Logger)
 
-	sellers, err := data.Seller{}.GetAll()
+	sellers, err := repository.Seller{}.GetAll()
 	if err != nil {
 		logger.Error("failed to get sellers", zap.Error(err))
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -41,10 +41,10 @@ func GetSellers(w http.ResponseWriter, r *http.Request) {
 func InsertSeller(w http.ResponseWriter, r *http.Request) {
 	logger := r.Context().Value("logger").(*zap.Logger)
 
-	var seller data.Seller
+	var seller repository.Seller
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		logger.Error("failed to read seller data", zap.Error(err))
+		logger.Error("failed to read seller repository", zap.Error(err))
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -56,7 +56,7 @@ func InsertSeller(w http.ResponseWriter, r *http.Request) {
 	}(r.Body)
 
 	if err = json.Unmarshal(body, &seller); err != nil {
-		logger.Error("failed to Unmarshal seller data", zap.Error(err))
+		logger.Error("failed to Unmarshal seller repository", zap.Error(err))
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -92,7 +92,7 @@ func DeleteSeller(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	seller := data.Seller{}
+	seller := repository.Seller{}
 	seller.ID = sellerID
 	deleted, err := seller.Delete()
 	if err != nil {
@@ -117,11 +117,11 @@ func DeleteSeller(w http.ResponseWriter, r *http.Request) {
 func UpdateSeller(w http.ResponseWriter, r *http.Request) {
 	logger := r.Context().Value("logger").(*zap.Logger)
 
-	var seller data.Seller
+	var seller repository.Seller
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		logger.Error("failed to Unmarshal seller data", zap.Error(err))
+		logger.Error("failed to Unmarshal seller repository", zap.Error(err))
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -133,7 +133,7 @@ func UpdateSeller(w http.ResponseWriter, r *http.Request) {
 	}(r.Body)
 
 	if err = json.Unmarshal(body, &seller); err != nil {
-		logger.Error("failed to Unmarshal seller data", zap.Error(err))
+		logger.Error("failed to Unmarshal seller repository", zap.Error(err))
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}

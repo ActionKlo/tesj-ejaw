@@ -1,15 +1,15 @@
 package main
 
 import (
-	"github.com/ActionKlo/test-ejaw/internal/data"
 	"github.com/ActionKlo/test-ejaw/internal/handlers"
 	"github.com/ActionKlo/test-ejaw/internal/middleware"
+	"github.com/ActionKlo/test-ejaw/internal/repository"
 	"log"
 	"net/http"
 )
 
 func main() {
-	data.InitDB()
+	repository.InitDB()
 
 	mux := http.NewServeMux()
 
