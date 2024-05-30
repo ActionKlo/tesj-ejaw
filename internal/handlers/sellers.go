@@ -4,11 +4,25 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/ActionKlo/test-ejaw/internal/data"
-	"github.com/ActionKlo/test-ejaw/internal/utils"
 	"go.uber.org/zap"
 	"io"
 	"net/http"
+	"strconv"
 )
+
+func sendJSON(w http.ResponseWriter, statusCode int, data any) {
+	w.Header().Set("Content-Type", "application/json")
+
+	if statusCode != http.StatusOK {
+		w.WriteHeader(statusCode)
+	}
+
+	err := json.NewEncoder(w).Encode(data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
 
 func GetSellers(w http.ResponseWriter, r *http.Request) {
 	logger := r.Context().Value("logger").(*zap.Logger)
@@ -21,24 +35,31 @@ func GetSellers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	logger.Info("got all sellers", zap.Any("sellers", sellers))
-	utils.SendJSON(w, http.StatusOK, sellers)
+	sendJSON(w, http.StatusOK, sellers)
 }
 
 func InsertSeller(w http.ResponseWriter, r *http.Request) {
 	logger := r.Context().Value("logger").(*zap.Logger)
 
 	var seller data.Seller
-	if err := json.NewDecoder(r.Body).Decode(&seller); err != nil {
-		logger.Error("failed to Unmarshal seller data", zap.Error(err))
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		logger.Error("failed to read seller data", zap.Error(err))
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	defer func(Body io.ReadCloser) {
-		err := Body.Close()
+		err = Body.Close()
 		if err != nil {
 			logger.Error("failed to close Body", zap.Error(err))
 		}
 	}(r.Body)
+
+	if err = json.Unmarshal(body, &seller); err != nil {
+		logger.Error("failed to Unmarshal seller data", zap.Error(err))
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	if seller.Name == "" || seller.Phone == "" {
 		logger.Error("bad request body", zap.Error(errors.New("BadRequest")))
@@ -54,7 +75,7 @@ func InsertSeller(w http.ResponseWriter, r *http.Request) {
 	}
 
 	logger.Info("seller inserted", zap.Any("seller ID", id))
-	utils.SendJSON(w, http.StatusCreated, struct {
+	sendJSON(w, http.StatusCreated, struct {
 		ID int `json:"id"`
 	}{
 		ID: id,
@@ -64,26 +85,15 @@ func InsertSeller(w http.ResponseWriter, r *http.Request) {
 func DeleteSeller(w http.ResponseWriter, r *http.Request) {
 	logger := r.Context().Value("logger").(*zap.Logger)
 
-	var seller data.Seller
-	if err := json.NewDecoder(r.Body).Decode(&seller); err != nil {
-		logger.Error("failed to Unmarshal seller data", zap.Error(err))
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			logger.Error("failed to close Body", zap.Error(err))
-		}
-	}(r.Body)
-
-	if seller.ID <= 0 {
+	sellerID, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || sellerID <= 0 {
 		logger.Error("bad request body", zap.Error(errors.New("BadRequest")))
 		http.Error(w, errors.New("bad request body").Error(), http.StatusBadRequest)
 		return
 	}
 
+	seller := data.Seller{}
+	seller.ID = sellerID
 	deleted, err := seller.Delete()
 	if err != nil {
 		logger.Error("failed to delete seller", zap.Error(err))
@@ -97,7 +107,7 @@ func DeleteSeller(w http.ResponseWriter, r *http.Request) {
 	}
 
 	logger.Info("seller deleted", zap.Any("seller ID", seller.ID))
-	utils.SendJSON(w, http.StatusOK, struct {
+	sendJSON(w, http.StatusOK, struct {
 		ID int `json:"id"`
 	}{
 		ID: seller.ID,
@@ -108,18 +118,34 @@ func UpdateSeller(w http.ResponseWriter, r *http.Request) {
 	logger := r.Context().Value("logger").(*zap.Logger)
 
 	var seller data.Seller
-	if err := json.NewDecoder(r.Body).Decode(&seller); err != nil {
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		logger.Error("failed to Unmarshal seller data", zap.Error(err))
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	defer func(Body io.ReadCloser) {
+		err = Body.Close()
+		if err != nil {
+			logger.Error("failed to close Body", zap.Error(err))
+		}
+	}(r.Body)
+
+	if err = json.Unmarshal(body, &seller); err != nil {
 		logger.Error("failed to Unmarshal seller data", zap.Error(err))
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			logger.Error("failed to close Body", zap.Error(err))
-		}
-	}(r.Body)
+	sellerID, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || sellerID <= 0 {
+		logger.Error("bad request body", zap.Error(errors.New("BadRequest")))
+		http.Error(w, errors.New("bad request body").Error(), http.StatusBadRequest)
+		return
+	}
+
+	seller.ID = sellerID
 
 	if seller.ID <= 0 || seller.Name == "" || seller.Phone == "" {
 		logger.Error("bad request body", zap.Error(errors.New("BadRequest")))
@@ -140,7 +166,7 @@ func UpdateSeller(w http.ResponseWriter, r *http.Request) {
 	}
 
 	logger.Info("seller updated", zap.Any("seller ID", seller.ID))
-	utils.SendJSON(w, http.StatusOK, struct {
+	sendJSON(w, http.StatusOK, struct {
 		ID int `json:"id"`
 	}{
 		ID: seller.ID,
