@@ -13,7 +13,7 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("GET /sellers", middleware.Auth(handlers.GetSellers))
+	mux.HandleFunc("GET /sellers", middleware.Logger(middleware.Auth(handlers.GetSellers)))
 	mux.HandleFunc("POST /sellers", middleware.Auth(handlers.InsertSeller))
 	mux.HandleFunc("DELETE /sellers", middleware.Auth(handlers.DeleteSeller))
 	mux.HandleFunc("PUT /sellers", middleware.Auth(handlers.UpdateSeller))
