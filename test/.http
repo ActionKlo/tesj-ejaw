@@ -68,7 +68,34 @@ Authorization: Basic admin admin
 Content-Type: application/json
 
 {
+  "id": 19
+}
+
+###
+
+PUT http://localhost:8080/sellers
+Content-Type: application/json
+
+{
   "id": 1
+}
+
+> {%
+    client.test("Request without authentication", function() {
+        client.assert(response.status === 401, "Response status is not 401");
+    });
+%}
+
+###
+
+PUT http://localhost:8080/sellers
+Authorization: Basic admin admin
+Content-Type: application/json
+
+{
+  "id": 19,
+  "name": "Yana",
+  "phone": "500600701"
 }
 
 ###
