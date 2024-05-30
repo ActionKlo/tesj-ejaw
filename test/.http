@@ -46,14 +46,16 @@ Content-Type: application/json
   "phone": "100200300"
 }
 
+> {%
+    client.test("Request with authentication", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
 ###
 
-DELETE http://localhost:8080/sellers
+DELETE http://localhost:8080/seller/1
 Content-Type: application/json
-
-{
-  "id": 1
-}
 
 > {%
     client.test("Request without authentication", function() {
@@ -63,22 +65,9 @@ Content-Type: application/json
 
 ###
 
-DELETE http://localhost:8080/sellers
+DELETE http://localhost:8080/seller/1
 Authorization: Basic admin admin
 Content-Type: application/json
-
-{
-  "id": 19
-}
-
-###
-
-PUT http://localhost:8080/sellers
-Content-Type: application/json
-
-{
-  "id": 1
-}
 
 > {%
     client.test("Request without authentication", function() {
@@ -88,14 +77,35 @@ Content-Type: application/json
 
 ###
 
-PUT http://localhost:8080/sellers
-Authorization: Basic admin admin
+PUT http://localhost:8080/seller/1
 Content-Type: application/json
 
 {
-  "id": 19,
   "name": "Yana",
   "phone": "500600701"
 }
+
+> {%
+    client.test("Request without authentication", function() {
+        client.assert(response.status === 401, "Response status is not 401");
+    });
+%}
+
+###
+
+PUT http://localhost:8080/seller/1
+Authorization: Basic admin admin
+Content-Type: application/json
+
+{
+  "name": "Yana",
+  "phone": "500600701"
+}
+
+> {%
+    client.test("Request with authentication", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
 
 ###
