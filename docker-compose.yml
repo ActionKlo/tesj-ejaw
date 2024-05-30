@@ -5,12 +5,20 @@ services:
     container_name: api
     build:
       dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     restart: always
     ports:
       - "8080:8080"
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - shop-network
 
   db:
     container_name: db
@@ -18,10 +26,12 @@ services:
     restart: always
     ports:
       - "5432:5432"
+    env_file:
+      - .env
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: ejaw
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - ./db-data/postgres/:/var/lib/postgresql/data/
     healthcheck:
@@ -35,9 +45,15 @@ services:
   migrate:
     container_name: migrate
     image: 'migrate/migrate'
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     command: [
       "-path", "/internal/migrations",
-      "-database", "postgres://admin:password@db:5432/ejaw?sslmode=disable",
+      "-database", "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?sslmode=disable",
       "up"
     ]
     volumes:

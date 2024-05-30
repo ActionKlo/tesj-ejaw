@@ -2,7 +2,9 @@ package data
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
+	"os"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
@@ -10,7 +12,10 @@ import (
 var db *sql.DB
 
 func InitDB() {
-	dsn := "postgres://admin:password@100.104.232.63:5432/ejaw?sslmode=disable"
+	dsn := fmt.Sprintf("postgres://%s:%s@db:5432/%s?sslmode=disable",
+		os.Getenv("POSTGRES_USER"),
+		os.Getenv("POSTGRES_PASSWORD"),
+		os.Getenv("POSTGRES_DB"))
 
 	var err error
 	db, err = sql.Open("pgx", dsn)
