@@ -89,3 +89,34 @@ func (s Seller) Delete() (bool, error) {
 
 	return true, nil
 }
+
+func (s Seller) Update() (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
+	defer cancel()
+
+	query := `update sellers set
+				name = $2,
+				phone = $3
+				where id = $1
+	`
+
+	res, err := db.ExecContext(ctx, query,
+		s.ID,
+		s.Name,
+		s.Phone,
+	)
+	if err != nil {
+		return false, err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return false, err
+	}
+
+	if rowsAffected == 0 {
+		return false, nil
+	}
+
+	return true, nil
+}

@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/ActionKlo/test-ejaw/internal/data"
 	"github.com/ActionKlo/test-ejaw/internal/utils"
 	"io"
@@ -59,7 +58,7 @@ func DeleteSeller(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	fmt.Println(seller)
+
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
@@ -79,6 +78,43 @@ func DeleteSeller(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !deleted {
+		http.Error(w, errors.New("seller not fount").Error(), http.StatusBadRequest)
+	}
+
+	utils.SendJSON(w, http.StatusOK, struct {
+		ID int `json:"id"`
+	}{
+		ID: seller.ID,
+	})
+}
+
+func UpdateSeller(w http.ResponseWriter, r *http.Request) {
+	// !TODO check if typeOf(id) == int
+	var seller data.Seller
+	if err := json.NewDecoder(r.Body).Decode(&seller); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Println("failed to close r.Body:", err.Error())
+		}
+	}(r.Body)
+
+	if seller.ID <= 0 || seller.Name == "" || seller.Phone == "" {
+		http.Error(w, errors.New("bad request body").Error(), http.StatusBadRequest)
+		return
+	}
+
+	updated, err := seller.Update()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if !updated {
 		http.Error(w, errors.New("seller not fount").Error(), http.StatusBadRequest)
 	}
 
