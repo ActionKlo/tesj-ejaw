@@ -1,18 +1,25 @@
 meta {
-  name: Get all sellers with auth
+  name: Update seller by ID
   type: http
-  seq: 1
+  seq: 5
 }
 
-get {
-  url: http://localhost:8080/sellers
-  body: none
+put {
+  url: http://localhost:8080/seller/8
+  body: json
   auth: basic
 }
 
 auth:basic {
   username: admin
   password: admin
+}
+
+body:json {
+  {
+    "name": "Yana",
+    "phone": "100200399"
+  }
 }
 
 tests {

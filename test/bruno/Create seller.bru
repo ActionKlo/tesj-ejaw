@@ -1,0 +1,29 @@
+meta {
+  name: Create seller
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:8080/seller
+  body: json
+  auth: basic
+}
+
+auth:basic {
+  username: admin
+  password: admin
+}
+
+body:json {
+  {
+    "name": "Andrei",
+    "phone": "100200300"
+  }
+}
+
+tests {
+  test("status code is 201", function() {
+    expect(res.status).equal(201);
+  });
+}
