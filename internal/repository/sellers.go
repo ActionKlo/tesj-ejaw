@@ -3,39 +3,34 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"log"
+	"github.com/ActionKlo/test-ejaw/internal/models"
+	"go.uber.org/zap"
 	"time"
 )
 
 const dbTimeout = time.Second * 3
 
-type Seller struct {
-	ID    int    `json:"id"`
-	Name  string `json:"name,omitempty"`
-	Phone string `json:"phone,omitempty"`
-}
-
-func (s Seller) GetAll() ([]Seller, error) {
+func (s *Service) GetAll() ([]models.Seller, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
 	query := `select id, name, phone from sellers`
 
-	rows, err := db.QueryContext(ctx, query)
+	rows, err := s.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
 	}
 	defer func(rows *sql.Rows) {
 		err = rows.Close()
 		if err != nil {
-			log.Println("failed to close sql.Rows:", err.Error())
+			s.logger.Error("failed to close sql.Rows:", zap.Error(err))
 		}
 	}(rows)
 
-	var sellers []Seller
+	var sellers []models.Seller
 
 	for rows.Next() {
-		var seller Seller
+		var seller models.Seller
 		if err = rows.Scan(
 			&seller.ID,
 			&seller.Name,
@@ -50,16 +45,16 @@ func (s Seller) GetAll() ([]Seller, error) {
 	return sellers, nil
 }
 
-func (s Seller) Insert() (int, error) {
+func (s *Service) Insert(name, phone string) (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
 	query := `insert into sellers (name, phone) values ($1, $2) returning id`
 
 	var newSellerID int
-	if err := db.QueryRowContext(ctx, query,
-		s.Name,
-		s.Phone,
+	if err := s.db.QueryRowContext(ctx, query,
+		name,
+		phone,
 	).Scan(&newSellerID); err != nil {
 		return 0, err
 	}
@@ -67,13 +62,13 @@ func (s Seller) Insert() (int, error) {
 	return newSellerID, nil
 }
 
-func (s Seller) Delete() (bool, error) {
+func (s *Service) Delete(id int) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
 	query := `delete from sellers where id = $1`
 
-	res, err := db.ExecContext(ctx, query, s.ID)
+	res, err := s.db.ExecContext(ctx, query, id)
 	if err != nil {
 		return false, err
 	}
@@ -90,7 +85,7 @@ func (s Seller) Delete() (bool, error) {
 	return true, nil
 }
 
-func (s Seller) Update() (bool, error) {
+func (s *Service) Update(id int, name, phone string) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
@@ -100,10 +95,10 @@ func (s Seller) Update() (bool, error) {
 				where id = $1
 	`
 
-	res, err := db.ExecContext(ctx, query,
-		s.ID,
-		s.Name,
-		s.Phone,
+	res, err := s.db.ExecContext(ctx, query,
+		id,
+		name,
+		phone,
 	)
 	if err != nil {
 		return false, err
