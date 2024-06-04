@@ -8,6 +8,7 @@ COPY . /app
 WORKDIR /app
 
 RUN go mod tidy
+RUN go mod download
 
 RUN CGO_ENABLE=0 go build -o shopAPI ./cmd/api/
 
@@ -19,5 +20,6 @@ FROM alpine:latest
 RUN mkdir /app
 
 COPY --from=builder /app/shopAPI /app/
+COPY .env /app/
 
 CMD [ "/app/shopAPI" ]
