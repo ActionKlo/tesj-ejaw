@@ -5,7 +5,7 @@ meta {
 }
 
 get {
-  url: http://localhost:8080/sellers
+  url: http://{{host}}:8080/sellers
   body: none
   auth: basic
 }
@@ -13,6 +13,10 @@ get {
 auth:basic {
   username: admin
   password: admin
+}
+
+script:pre-request {
+  bru.setEnvVar("id",value)
 }
 
 tests {

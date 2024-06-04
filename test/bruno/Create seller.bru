@@ -5,7 +5,7 @@ meta {
 }
 
 post {
-  url: http://localhost:8080/seller
+  url: http://{{host}}:8080/seller
   body: json
   auth: basic
 }
@@ -20,6 +20,10 @@ body:json {
     "name": "Andrei",
     "phone": "100200300"
   }
+}
+
+script:post-response {
+  bru.setEnvVar("id",res.body.id)
 }
 
 tests {
