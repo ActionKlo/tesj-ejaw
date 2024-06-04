@@ -152,10 +152,10 @@ func (h *RecipesHandler) UpdateSeller(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, errors.New("seller not fount").Error(), http.StatusBadRequest)
 	}
 
-	h.logger.Info("seller updated", zap.Any("seller ID", seller.ID))
+	h.logger.Info("seller updated", zap.Any("seller ID", sellerID))
 	sendJSON(w, http.StatusOK, struct {
 		ID int `json:"id"`
 	}{
-		ID: seller.ID,
+		ID: sellerID,
 	})
 }
